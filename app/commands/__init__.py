@@ -11,7 +11,10 @@ class CommandHandler:
 
     def register_command(self, command_name: str, command: Command):
         self.commands[command_name] = command
-        
+
+    def print_commands(self):
+        return f"{self.commands.keys()}"
+
     def execute_command(self, command_name: str):
         if command_name in self.commands:
             self.commands[command_name].execute()
