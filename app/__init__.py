@@ -1,30 +1,30 @@
+import pkgutil
+import importlib
 from app.commands import CommandHandler
-from app.commands.add import AddCommand
-from app.commands.subtract import SubtractCommand
-from app.commands.multiply import MultiplyCommand
-from app.commands.divide import DivideCommand
-from app.commands.greet import GreetCommand
+from app.commands import Command
 
 
 class App:
 
     def __init__(self):
         self.command_handler = CommandHandler()
-        self.command_handler.register_command("greet", GreetCommand())
-        self.command_handler.register_command("add", AddCommand())
-        self.command_handler.register_command("subtract", SubtractCommand())
-        self.command_handler.register_command("multiply", MultiplyCommand())
-        self.command_handler.register_command("divide", DivideCommand())
+
+    def load_plugins(self):
+        plugins_package = 'app.plugins'
+        for _, plugin_name, is_pkg in pkgutil.iter_modules([plugins_package.replace('.', '/')]):
+            if is_pkg:
+                plugin_module = importlib.import_module(f'{plugins_package}.{plugin_name}')
+                for item_name in dir(plugin_module):
+                    item = getattr(plugin_module, item_name)
+                    try:
+                        if issubclass(item, (Command)):
+                            self.command_handler.register_command(plugin_name, item())
+                    except TypeError:
+                        continue
 
 
     def start(self):
         print("Type 'exit' to exit.")
-        
+        self.load_plugins()
         while True:
-            user_input = input(">>> ")
-            if user_input.lower() == "exit":
-                print("Exiting...")
-                break
-            self.command_handler.execute_command(user_input)
-
-        
+            self.command_handler.execute_command(input(">>> ").strip())
