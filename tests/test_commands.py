@@ -2,11 +2,14 @@
 Testing all the commands
 """
 from decimal import Decimal
-from app.commands.greet import GreetCommand
-from app.commands.add import AddCommand
-from app.commands.subtract import SubtractCommand
-from app.commands.multiply import MultiplyCommand
-from app.commands.divide import DivideCommand
+
+import pytest
+from app.plugins.exit import ExitCommand
+from app.plugins.greet import GreetCommand
+from app.plugins.add import AddCommand
+from app.plugins.subtract import SubtractCommand
+from app.plugins.multiply import MultiplyCommand
+from app.plugins.divide import DivideCommand
 
 def test_greet_command(capfd):
     '''
@@ -64,3 +67,12 @@ def test_division_functionality(monkeypatch, capfd):
     out, err = capfd.readouterr()  # pylint: disable=unused-variable
     expected_output = str(Decimal('10') / Decimal('5')) + '\n'
     assert out == expected_output, f"Expected output was '{expected_output}', got '{out}' instead."
+
+def test_exit_command():
+    '''
+    Test exit command
+    '''
+    command = ExitCommand()
+    with pytest.raises(SystemExit) as e:
+        command.execute()
+    assert str(e.value) == "Exiting...", "The ExitCommand should trigger system exit with 'Exiting...' message"
